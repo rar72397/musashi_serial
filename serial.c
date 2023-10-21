@@ -51,7 +51,7 @@ unsigned char buffer_read(struct circular_buffer* buffer){
 void buffer_write(struct circular_buffer* buffer, unsigned char val){
     // if buffer is full, return -1
     if((buffer->writePointer + 1) % 16 == buffer->readPointer){
-        return -1;
+        return;
     }
     // else, write value to write pointer and increment write pointer
     else{
@@ -128,16 +128,16 @@ struct serial_chip chip;
 // initialized to 0
 
 #define REG_PTR(CHANNEL, NUMBER) \
-    // first clears the previous pointer bits
-    // then sets the new pointer bits
-    if(CHANNEL == 'A'){ \
-        chip.controlRegisterA[0] &= ~(7); \
-        chip.controlRegisterA[0] |= NUMBER; \
-    }
-    else if(CHANNEL == 'B'){ \
-        chip.controlRegisterB[0] &= ~(7); \
-        chip.controlRegisterB[0] |= NUMBER; \
-    }\
+    do { \
+        if(CHANNEL == 'A'){ \
+            chip.controlRegisterA[0] &= ~(7); \
+            chip.controlRegisterA[0] |= NUMBER; \
+        } \
+        else if(CHANNEL == 'B'){ \
+            chip.controlRegisterB[0] &= ~(7); \
+            chip.controlRegisterB[0] |= NUMBER; \
+        } \
+    } while (0)
 
 
 // Command Bits - Control Register 0, bits 3 through 5
@@ -153,14 +153,17 @@ struct serial_chip chip;
 // 111 - end of interrupt (channel A only)
 
 #define COMMAND(CHANNEL, NUMBER)\
-    if(CHANNEL == 'A'){ \
-        chip.controlRegisterA[0] &= ~(7<<3); \
-        chip.controlRegisterA[0] |= (NUMBER<<3); \
-    }
-    else if(CHANNEL == 'B'){ \
-        chip.controlRegisterB[0] &= ~(7<<3); \
-        chip.controlRegisterB[0] |= (NUMBER<<3); \
-    }\
+    do{ \
+        if(CHANNEL == 'A'){ \
+            chip.controlRegisterA[0] &= ~(7<<3); \
+            chip.controlRegisterA[0] |= (NUMBER<<3); \
+        } \
+        else if(CHANNEL == 'B'){ \
+            chip.controlRegisterB[0] &= ~(7<<3); \
+            chip.controlRegisterB[0] |= (NUMBER<<3); \
+        } \
+    } while(0)
+
 
 // CRC Control Commands - Control Register 0, bits 6 and 7
 // will be unused in the code, setting all to 0
@@ -214,14 +217,17 @@ struct serial_chip chip;
 // Receiver Interrupt Mode - Control Register 1, bits 3 and 4
 // a lot of the actual commands for this function will go unused since we aren't using HDLC, etc
 #define RECEIVER_INT_MODE(CHANNEL, NUMBER)\
-    if(CHANNEL == 'A'){ \
-        chip.controlRegisterA[1] &= ~(3<<3); \
-        chip.controlRegisterA[1] |= (NUMBER<<3); \
-    }
-    else if(CHANNEL == 'B'){ \
-        chip.controlRegisterB[1] &= ~(3<<3); \
-        chip.controlRegisterB[1] |= (NUMBER<<3); \
-    }\
+    do{ \
+        if(CHANNEL == 'A'){ \
+            chip.controlRegisterA[1] &= ~(3<<3); \
+            chip.controlRegisterA[1] |= (NUMBER<<3); \
+        }\
+        else if(CHANNEL == 'B'){ \
+            chip.controlRegisterB[1] &= ~(3<<3); \
+            chip.controlRegisterB[1] |= (NUMBER<<3); \
+        }\
+    } while(0) \
+    
 
 // Wait on Receiver/Transmitter - Control Register 1, bit 5
 #define WAIT_ON_RxTx(CHANNEL, STATUS)\
@@ -300,7 +306,7 @@ struct serial_chip chip;
 // Interrupt Vector Mode - Control Register 2, bit 3 through 5
 #define INT_VEC_MODE(NUMBER)\
     chip.controlRegisterA[1] &= ~(7<<3);\
-    chip.controlRegisterA |= (NUMBER<<3);\
+    chip.controlRegisterA[1] |= (NUMBER<<3);\
 
 // Rx Int Mask - Control Register 2, bit 6
 #define Rx_INT_MASK(STATUS)\
@@ -312,13 +318,16 @@ struct serial_chip chip;
     }
 
 // Pin 10 !SYNCB/!RTSB Select - Control Register 2, bit 7
-#define PIN10_SEL(STATUS)
-    if(STATUS == 's'){\
-        chip.controlRegisterA[1] |= (1<<7);\
-    }\
-    else if(STATUS == 'c'){\
-        chip.controlRegisterA[1] &= ~(1<<7);\
-    }
+#define PIN10_SEL(STATUS)\
+    do{ \
+        if(STATUS == 's'){\
+            chip.controlRegisterA[1] |= (1<<7);\
+        }\
+        else if(STATUS == 'c'){\
+            chip.controlRegisterA[1] &= ~(1<<7);\
+        }\
+    }while(0)
+    
 
 // --------------- CONTROL REGISTER 3 ------------------------
 
@@ -374,14 +383,17 @@ struct serial_chip chip;
 
 // Number of Received Bits per Character - Control Register 3, bits 6 and 7
 #define R_BITS_PER_CHAR(CHANNEL, NUMBER)\
-    if(CHANNEL == 'A'){ \
-        chip.controlRegisterA[3] &= ~(3<<6); \
-        chip.controlRegisterA[3] |= (NUMBER<<6); \
-    }
-    else if(CHANNEL == 'B'){ \
-        chip.controlRegisterB[3] &= ~(3<<6); \
-        chip.controlRegisterB[3] |= (NUMBER<<6); \
-    }\
+    do{ \
+        if(CHANNEL == 'A'){ \
+            chip.controlRegisterA[3] &= ~(3<<6); \
+            chip.controlRegisterA[3] |= (NUMBER<<6); \
+        } \
+        else if(CHANNEL == 'B'){ \
+            chip.controlRegisterB[3] &= ~(3<<6); \
+            chip.controlRegisterB[3] |= (NUMBER<<6); \
+        }\
+    }while(0)
+    
 
 // ----------------------------------------------------------
 
@@ -811,6 +823,7 @@ unsigned char transmit_read(char channel){
     else{ // Only allowed to look at A and B channels
         printf("Invalid channel name. Use either 'A' or 'B'");
     }
+    return 0;
 }
 
 // ---------------------------------------------------------------------------------------------------
@@ -840,6 +853,7 @@ unsigned char receive_read(char channel){
     else{ // Only allowed to look at A and B channels
         printf("Invalid channel name. Use either 'A' or 'B'");
     }
+    return 0;
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------
