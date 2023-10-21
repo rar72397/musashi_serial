@@ -7,7 +7,7 @@
 
 // declare chip as volatile global variable
 
-#include serial.c
+#include "serial.c"
 
 int main(){
     
