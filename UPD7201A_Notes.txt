@@ -1,0 +1,35 @@
+Notes on UPD7201A Serial Chip 
+
+MPSCC (Multiprotocol Serial Communication Control) - Data sheet refers to chip by this name
+
+We are only working with Asynchronous, not HDLC (High-level Data Link Control) or Synchronous Modes
+
+each channel has their own set of registers that act almost exactly the same
+channel B one extra status register SR[2], whose contents are then used in control register CR[2]
+channel A status register SR[2] is unused, however I'm keeping the sizes of the registers the same for consistency
+
+DCD: Data Carrier Detect - input goes low to indicate the presence of valid serial data at RxD (in channels A or B)
+
+Tx Byte Counter:
+There should be two different counters, one that has how many bytes are currently in the transmit buffer (which need to be sent),
+and one that tracks how many have been sent so far. Transmission (DMA requests), will be stopped when these two numbers are equal 
+to each other.
+
+Data Bus goes from processor to serial chip
+Serial chip communicates with other devices via serial Tx/Rx 
+
+Special Receive Conditions
+-Receive overrun error
+-Asynchronous framing error
+-Parity error
+-HDLC end of message (final flag received)
+
+Latched: once a flag is set, will remain set until manually reset by error reset command
+
+Parity Error and Receiver Overrun Error are latched
+Others are not latched, follows each character available in receiver buffer
+
+Definitions from ChapGPT
+Vectored interrupt: In a vectored interrupt system, each interrupt source is associated with a specific memory address (a vector). When an interrupt occurs, the processor uses this address to jump directly to the corresponding interrupt service routine (ISR).
+
+Nonvectored interrupt: In a non-vectored interrupt system, all interrupt requests are funneled to a single interrupt handler. The interrupt handler then needs to determine which interrupt source triggered the interrupt and execute the corresponding routine.
