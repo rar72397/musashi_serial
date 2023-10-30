@@ -13,7 +13,7 @@
 
 void test_writes()
 {
-    printf("Testing transmit_write function...\n");
+    printf("Testing write functions...\n");
 
     // writing until the buffer is full, want to see if wrap around works
     for (char c = 'a'; c <= 'r'; ++c)
@@ -40,7 +40,7 @@ void test_writes()
 
 void test_reads()
 {
-    printf("Testing transmit_read function...\n");
+    printf("Testing read functions...\n");
     unsigned char At = transmit_read('A');
     unsigned char Ar = receive_read('A');
     unsigned char Bt = transmit_read('B');
