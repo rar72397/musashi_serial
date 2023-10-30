@@ -786,8 +786,8 @@ void chip_init()
     TRANSMITTER_INTERRUPT_ENABLE('B', 'c');
     CONDITION_AFFECTS_VECTOR('A', 'c');
     CONDITION_AFFECTS_VECTOR('B', 'c');
-    RECEIVER_INT_MODE('A', 'c');
-    RECEIVER_INT_MODE('B', 'c');
+    RECEIVER_INT_MODE('A', 0);
+    RECEIVER_INT_MODE('B', 0);
     WAIT_ON_RxTx('A', 'c');
     WAIT_ON_RxTx('B', 'c');
     Tx_COUNT_ENABLE('A', 'c');
