@@ -11,86 +11,47 @@
 #include <stdio.h>
 #include <assert.h>
 
-/*
-// Mock buffer_write function if it's not available
-void buffer_write(buffer_t *buffer, char val)
-{
-    // Mock write to buffer
-    // This is a mock function, replace with actual implementation
-}
-
-// Mock buffer_read function if it's not available
-unsigned char buffer_read(buffer_t *buffer)
-{
-    // Mock read from buffer
-    // This is a mock function, replace with actual implementation
-    return '0'; // placeholder
-}
-
-// Mock buffer_print function if it's not available
-void buffer_print(buffer_t *buffer)
-{
-    // Mock print buffer contents
-    // This is a mock function, replace with actual implementation
-}
-
-void test_transmit_write()
+void test_writes()
 {
     printf("Testing transmit_write function...\n");
-    // setup
-    char test_val = 'x';
-    // execute
-    transmit_write('A', test_val);
-    // assert and verify if necessary
-    // ... add your assertions and verifications here
-    printf("transmit_write function passed.\n");
+
+    // writing until the buffer is full, want to see if wrap around works
+    for(char c='a'; c<='r'; ++c){
+        transmit_write('A', c);
+        transmit_write('B', c);
+        receive_write('A', c);
+        receive_write('B', c);
+    }
+   
+    printf("At: ");
+    TxRx_print('A', 't');
+    printf("\n");
+    printf("Ar: ");
+    TxRx_print('A', 'r');
+    printf("\n");
+    printf("Bt: ");
+    TxRx_print('B', 't');
+    printf("\n");
+    printf("Br: ");
+    TxRx_print('B', 'r');
+    printf("\n");
 }
 
-void test_transmit_read()
+void test_reads()
 {
     printf("Testing transmit_read function...\n");
-    // setup
-    // ... add setup code
-    // execute
-    char val = transmit_read('A');
-    // assert
-    assert(val == 'expected_value'); // replace expected_value with the actual expected value
-    printf("transmit_read function passed.\n");
+    unsigned char At = transmit_read('A');
+    unsigned char Ar = receive_read('A');
+    unsigned char Bt = transmit_read('B');
+    unsigned char Br = receive_read('B');
+
+    printf("At: %c\n", At);
+    printf("Ar: %c\n", Ar);
+    printf("Bt: %c\n", Bt);
+    printf("Br: %c\n", Br);
 }
 
-void test_receive_write()
-{
-    printf("Testing receive_write function...\n");
-    // setup
-    char test_val = 'y';
-    // execute
-    receive_write('B', test_val);
-    // assert and verify if necessary
-    // ... add your assertions and verifications here
-    printf("receive_write function passed.\n");
-}
-
-void test_receive_read()
-{
-    printf("Testing receive_read function...\n");
-    // setup
-    // ... add setup code
-    // execute
-    char val = receive_read('B');
-    // assert
-    assert(val == 'expected_value'); // replace expected_value with the actual expected value
-    printf("receive_read function passed.\n");
-}
-
-void test_print_register()
-{
-    printf("Testing print_register function...\n");
-    // this function prints to console, so a visual check is needed
-    TxRx_print('A', 't');
-    // check console output for correctness
-    printf("Check above output for correctness.\n");
-}
-*/
+extern struct serial_chip chip;
 
 int main()
 {
@@ -132,13 +93,13 @@ int main()
         printf("\n");
     }
 
-    /*test_transmit_write();
-    test_transmit_read();
-    test_receive_write();
-    test_receive_read();
-    test_print_register();*/
-
-    printf("All tests passed.\n");
+    test_writes();
+    printf("\n");
+    test_reads();
+    printf("TxA byte count: %d", chip.TxA_byte_count);
+    printf("\n");
+    printf("TxB byte count: %d", chip.TxB_byte_count);
+    printf("\n");
 
     return 0;
 }
