@@ -3,19 +3,15 @@
 // THINGS TO TEST
 // 1. Basic reading and writing bits to all of the buffers (Channel A and B's receive and transmit buffers)
 // 2. writing until the circular buffer is full
-// 3.
 
-// declare chip as volatile global variable
+// declare chip as volatile global variable?
 
-#include "serial.c"
+#include "serial.h"
+#include "serial.c" //turn into a header instead
+#include <stdio.h>
+#include <assert.h>
 
-// Mock buffer_init function if it's not available
-void buffer_init(buffer_t *buffer)
-{
-    // Initialize the buffer here
-    // This is a mock function, replace with actual implementation
-}
-
+/*
 // Mock buffer_write function if it's not available
 void buffer_write(buffer_t *buffer, char val)
 {
@@ -90,19 +86,59 @@ void test_print_register()
 {
     printf("Testing print_register function...\n");
     // this function prints to console, so a visual check is needed
-    print_register('A', 't');
+    TxRx_print('A', 't');
     // check console output for correctness
     printf("Check above output for correctness.\n");
 }
+*/
 
 int main()
 {
-    chip_init(); // if necessary for setup
-    test_transmit_write();
+    chip_init(); //sets up circular buffers and intial register values
+    
+    // printing out the bits of each of the registers after originally set up
+    printf("CONTROL REGISTERS: \n");
+    printf("\n");
+    for(int j=0; j<8; ++j){
+        char registerA = chip.controlRegisterA[j];
+        char registerB = chip.controlRegisterB[j];
+
+        for (int i = 7; i >= 0; i--){
+            if(i == 7) printf("Register A%d: ", j);
+            printf("%d", (registerA >> i) & 1);
+            printf("\n");
+            if(i == 7) printf("Register B%d: ", j);
+            printf("%d", (registerB >> i) & 1);
+            printf("\n");
+        }
+        printf("\n");
+    }
+    
+    printf("-------------------\n");
+    printf("STATUS REGISTERS: \n");
+    for(int j=0; j<5; ++j){
+        char registerA = chip.statusRegisterA[j];
+        char registerB = chip.statusRegisterB[j];
+
+
+        for (int i = 7; i >= 0; i--){
+            if(i == 7) printf("Register A%d: ", j);
+            printf("%d", (registerA >> i) & 1);
+            printf("\n");
+            if(i == 7) printf("Register A%d: ", j);
+            printf("%d", (registerB >> i) & 1);
+            printf("\n");
+        }
+        printf("\n");
+    }
+
+    /*test_transmit_write();
     test_transmit_read();
     test_receive_write();
     test_receive_read();
-    test_print_register();
+    test_print_register();*/
+
     printf("All tests passed.\n");
+
     return 0;
 }

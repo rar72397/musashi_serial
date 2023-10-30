@@ -13,14 +13,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
-
-// circular buffer struct
-struct circular_buffer{
-    unsigned char buffer[16];
-    // read and write pointers point to the index of the buffer
-    int readPointer;
-    int writePointer;
-};
+#include "serial.h"
 
 void buffer_init(struct circular_buffer* buffer){
     // initialize read and write pointers point to the index of the buffer
@@ -71,53 +64,15 @@ void buffer_print(struct circular_buffer* buffer){
     }
 }
 
-// struct definition: represents each of the 4 registers that are used for serial communication
-// most likely that we'll only be reading to one channel from the microprocessor, but I'm just keeping
-// this in there
-struct serial_chip{
-
-    /* ---------- SIO BUFFERS ------------------------------------------
-     
-    these buffers should be circular buffers
-    make sure that reading/writing only happen if there is space within buffer
-    if read/write pointers overlap, buffer is full -> don't write anymore to buffer
-    if read/write are one apart, buffer is empty
-
-    ---------------------------------------------------------------------*/
-
-    struct circular_buffer aReceive; 
-    struct circular_buffer aTransmit;
-    struct circular_buffer bReceive;
-    struct circular_buffer bTransmit;
-
-    //---------- CONTROL AND STATUS REGISTERS ------------------------------------- 
-    // each channel has their own set of registers that act almost exactly the same
-    // channel B one extra status register SR[2], whose contents are then used in control register CR[2]
-    // channel A status register SR[2] is unused, however I'm keeping the sizes of the registers the same for
-    // consistency
-
-    unsigned char controlRegisterA[8];
-    unsigned char statusRegisterA[5];
-
-    unsigned char controlRegisterB[8];
-    unsigned char statusRegisterB[5];
-
-    unsigned int TxA_byte_count;
-    unsigned int TxB_byte_count;
-
-};
-
 // Unlike C++ structs in C can't have member functions, so it will be a global variable
 // that is called by functions below, also have to specify that serial_chip is struct in
 // declaration
 struct serial_chip chip;
 
-
 // Instead of having to memorize all of the bits of each of the registers, I have decided to write a bunch of macros
 // that set and clear the bits instead
 
 // status: can be 's' or 'c' for set and clear respectively
-
 
 // -------------------------------------------------------------------------------- CONTROL REGISTER MACROS ----------------------------------------------------------
 
@@ -859,7 +814,7 @@ unsigned char receive_read(char channel){
 // -------------------------------------------------------------------------------------------------------------------------------------
 
 // for output purposes
-void print_register(char channel, char type){
+void TxRx_print(char channel, char type){
     if(toupper(channel) == 'A'){
         if(type == 't'){
             buffer_print(&chip.aTransmit);
