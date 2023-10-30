@@ -59,7 +59,7 @@ int main()
     chip_init(); // sets up circular buffers and intial register values
 
     // printing out the bits of each of the CONTROL registers
-    printf("CONTROL REGISTERS: \n");
+    printf("----- CONTROL REGISTERS -----\n");
     for (int j = 0; j < 8; ++j)
     {
         printf("Register A%d: ", j);
@@ -76,10 +76,12 @@ int main()
         }
         printf("\n");
     }
+    printf("----- END CONTROL REGISTERS -----\n");
+
+    printf("\n");
 
     // printing out the bits of each of the STATUS registers
-    printf("-------------------\n");
-    printf("STATUS REGISTERS: \n");
+    printf("----- STATUS REGISTERS -----\n");
     for (int j = 0; j < 5; ++j)
     {
         printf("Status Register A%d: ", j);
@@ -96,6 +98,9 @@ int main()
         }
         printf("\n");
     }
+    printf("----- END STATUS REGISTERS -----\n");
+
+    printf("\n");
 
     test_writes();
     printf("\n");
