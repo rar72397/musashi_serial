@@ -7,7 +7,7 @@
 // declare chip as volatile global variable?
 
 #include "serial.h"
-#include "serial.c" //turn into a header instead
+#include "serial.c"
 #include <stdio.h>
 #include <assert.h>
 
@@ -16,13 +16,14 @@ void test_writes()
     printf("Testing transmit_write function...\n");
 
     // writing until the buffer is full, want to see if wrap around works
-    for(char c='a'; c<='r'; ++c){
+    for (char c = 'a'; c <= 'r'; ++c)
+    {
         transmit_write('A', c);
         transmit_write('B', c);
         receive_write('A', c);
         receive_write('B', c);
     }
-   
+
     printf("At: ");
     TxRx_print('A', 't');
     printf("\n");
@@ -55,40 +56,43 @@ extern struct serial_chip chip;
 
 int main()
 {
-    chip_init(); //sets up circular buffers and intial register values
-    
-    // printing out the bits of each of the registers after originally set up
-    printf("CONTROL REGISTERS: \n");
-    printf("\n");
-    for(int j=0; j<8; ++j){
-        char registerA = chip.controlRegisterA[j];
-        char registerB = chip.controlRegisterB[j];
+    chip_init(); // sets up circular buffers and intial register values
 
-        for (int i = 7; i >= 0; i--){
-            if(i == 7) printf("Register A%d: ", j);
-            printf("%d", (registerA >> i) & 1);
-            printf("\n");
-            if(i == 7) printf("Register B%d: ", j);
-            printf("%d", (registerB >> i) & 1);
-            printf("\n");
+    // printing out the bits of each of the CONTROL registers
+    printf("CONTROL REGISTERS: \n");
+    for (int j = 0; j < 8; ++j)
+    {
+        printf("Register A%d: ", j);
+        for (int i = 7; i >= 0; i--)
+        {
+            printf("%d", (chip.controlRegisterA[j] >> i) & 1);
+        }
+        printf("\n");
+
+        printf("Register B%d: ", j);
+        for (int i = 7; i >= 0; i--)
+        {
+            printf("%d", (chip.controlRegisterB[j] >> i) & 1);
         }
         printf("\n");
     }
-    
+
+    // printing out the bits of each of the STATUS registers
     printf("-------------------\n");
     printf("STATUS REGISTERS: \n");
-    for(int j=0; j<5; ++j){
-        char registerA = chip.statusRegisterA[j];
-        char registerB = chip.statusRegisterB[j];
+    for (int j = 0; j < 5; ++j)
+    {
+        printf("Status Register A%d: ", j);
+        for (int i = 7; i >= 0; i--)
+        {
+            printf("%d", (chip.statusRegisterA[j] >> i) & 1);
+        }
+        printf("\n");
 
-
-        for (int i = 7; i >= 0; i--){
-            if(i == 7) printf("Register A%d: ", j);
-            printf("%d", (registerA >> i) & 1);
-            printf("\n");
-            if(i == 7) printf("Register A%d: ", j);
-            printf("%d", (registerB >> i) & 1);
-            printf("\n");
+        printf("Status Register B%d: ", j);
+        for (int i = 7; i >= 0; i--)
+        {
+            printf("%d", (chip.statusRegisterB[j] >> i) & 1);
         }
         printf("\n");
     }
@@ -96,10 +100,8 @@ int main()
     test_writes();
     printf("\n");
     test_reads();
-    printf("TxA byte count: %d", chip.TxA_byte_count);
-    printf("\n");
-    printf("TxB byte count: %d", chip.TxB_byte_count);
-    printf("\n");
+    printf("TxA byte count: %d\n", chip.TxA_byte_count);
+    printf("TxB byte count: %d\n", chip.TxB_byte_count);
 
     return 0;
 }
