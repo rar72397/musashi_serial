@@ -16,7 +16,7 @@ void test_writes()
     printf("Testing transmit_write function...\n");
 
     // writing until the buffer is full, want to see if wrap around works
-    for(char c='a'; c<='r'; ++c){
+    for(char c='a'; c<='z'; ++c){
         transmit_write('A', c);
         transmit_write('B', c);
         receive_write('A', c);
@@ -49,6 +49,48 @@ void test_reads()
     printf("Ar: %c\n", Ar);
     printf("Bt: %c\n", Bt);
     printf("Br: %c\n", Br);
+}
+
+void test_wrap()
+{
+    printf("Testing buffer's ability to wrap around when full and everything in the beginning of the buffer has been read...\n");
+    for(char c='a'; c<='z'; ++c){
+        transmit_write('A', c);
+        transmit_write('B', c);
+        receive_write('A', c);
+        receive_write('B', c);
+        printf("At: %c\n", transmit_read('A'));
+        printf("Ar: %c\n", receive_read('A'));
+        printf("Bt: %c\n", transmit_read('B'));
+        printf("Br: %c\n", receive_read('B'));
+    }
+    printf("At: ");
+    TxRx_print('A', 't');
+    printf("\n");
+    printf("Ar: ");
+    TxRx_print('A', 'r');
+    printf("\n");
+    printf("Bt: ");
+    TxRx_print('B', 't');
+    printf("\n");
+    printf("Br: ");
+    TxRx_print('B', 'r');
+    printf("\n");
+    printf("Finished testing wrapping ability\n");
+    printf("\n");
+}
+
+void test_read2()
+{
+    printf("Testing buffer's ability to read up all the contents of the buffer when its not full...\n");
+    transmit_write('A', 'a');
+    transmit_write('A', 'b');
+    printf("At: %c\n", transmit_read('A'));
+    printf("At: %c\n", transmit_read('A'));
+    printf("At: %c\n", transmit_read('A'));
+    printf("At: %c\n", transmit_read('A'));
+    printf("Finished testing reading all contents in buffer\n");
+    printf("\n");
 }
 
 extern struct serial_chip chip;
@@ -93,6 +135,9 @@ int main()
         printf("\n");
     }
 
+    // printf("Testing empty buffer");
+    // test_reads();
+
     test_writes();
     printf("\n");
     test_reads();
@@ -100,6 +145,12 @@ int main()
     printf("\n");
     printf("TxB byte count: %d", chip.TxB_byte_count);
     printf("\n");
+    printf("\n");
+
+    chip_init(); // reset chip
+    test_read2();
+    chip_init(); // reset chip
+    test_wrap();
 
     return 0;
 }

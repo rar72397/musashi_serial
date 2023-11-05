@@ -16,6 +16,7 @@
 #include "serial.h"
 
 void buffer_init(struct circular_buffer* buffer){
+    buffer->full = 0;
     // initialize read and write pointers point to the index of the buffer
     buffer->readPointer = 0;
     buffer->writePointer = 0;
@@ -26,32 +27,53 @@ void buffer_init(struct circular_buffer* buffer){
 }
 
 // circular buffer functions
+
 // read from buffer at read pointer
-unsigned char buffer_read(struct circular_buffer* buffer){
-    // if buffer is empty, return -1
-    if(buffer->readPointer == buffer->writePointer){
+unsigned char buffer_read(struct circular_buffer* buffer) {
+    if(buffer->readPointer == buffer->writePointer && buffer->buffer[buffer->readPointer-1] == 0)
+    {
+        printf("Buffer is empty\n");
         return -1;
+    } 
+    // read everything in the buffer already so return the last read value
+    else if (buffer->readPointer == buffer->writePointer && buffer->buffer[buffer->readPointer-1] != 0)
+    {
+        return buffer->buffer[buffer->readPointer-1];
     }
-    // else, read value at read pointer and increment read pointer
-    else{
-        unsigned char val = buffer->buffer[buffer->readPointer];
+    // Read value from the current read pointer position
+    unsigned char val = buffer->buffer[buffer->readPointer];
+    // make sure to not read values that has not been written yet
+    if(buffer->readPointer != buffer->writePointer){
+        // Move the read pointer to the next position and handle wrapping
         buffer->readPointer = (buffer->readPointer + 1) % 16;
-        return val;
+    }
+    return val;
+}
+
+
+// write to buffer
+void buffer_write(struct circular_buffer* buffer, unsigned char val) {
+    // if buffer was full and spaces opened up
+    if(buffer->full && buffer->readPointer != ((buffer->writePointer + 1) % 16)){
+        buffer->full = 0;
+        // Move the write pointer to the next position first since current position is occupied
+        buffer->writePointer = (buffer->writePointer + 1) % 16;
+        // Write value to the current write pointer position
+        buffer->buffer[buffer->writePointer] = val;
+        // update position again so write pointer is at an empty space
+        buffer->writePointer = (buffer->writePointer + 1) % 16;
+    } else if(buffer->readPointer != ((buffer->writePointer + 1) % 16)){ 
+        // Write value to the current write pointer position
+        buffer->buffer[buffer->writePointer] = val;
+        // Move the write pointer to the next position and handle wrapping
+        buffer->writePointer = (buffer->writePointer + 1) % 16;
+    } else if (buffer->readPointer == ((buffer->writePointer + 1) % 16) && !buffer->full){
+        // fill in the last position in the buffer
+        buffer->buffer[buffer->writePointer] = val;
+        buffer->full = 1;
     }
 }
 
-// write to buffer
-void buffer_write(struct circular_buffer* buffer, unsigned char val){
-    // if buffer is full, return -1
-    if((buffer->writePointer + 1) % 16 == buffer->readPointer){
-        return;
-    }
-    // else, write value to write pointer and increment write pointer
-    else{
-        buffer->buffer[buffer->writePointer] = val;
-        buffer->writePointer = (buffer->writePointer + 1) % 16;
-    }
-}
 
 // print existing items in buffer, empty spaces are represented by 0 so don't print those
 void buffer_print(struct circular_buffer* buffer){
@@ -742,8 +764,8 @@ void chip_init(){
     chip.statusRegisterB[3] = 0;
     chip.statusRegisterB[4] = 0;
 
-    unsigned int TxA_byte_count = 0;
-    unsigned int TxB_byte_count = 0;
+    // unsigned int TxA_byte_count = 0;
+    // unsigned int TxB_byte_count = 0;
 }
 
 // FUNCTION PARAMETERS:
