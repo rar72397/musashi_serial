@@ -1,3 +1,32 @@
+/* need functions to return and update the status registers
+- read goes to status registers
+- control goes to control registers
+- need to support register pointer functionality
+- fucniton to read the receive buffer and write to transmit buffer
+- need to determine a vs b
+- funciton to write to the control register
+- function write status register
+- decide how to encode a vs b
+- decide how to encode control vs data
+- 0 1 2 6 on luna?
+- read data a, write data a, write control a, read status a
+- same for b
+- can simplify to just read and write that takes an address from 0 to 3
+- data for each channel and control for each channel
+- wrap in c++ and then figure out how to call those functions based on the address
+- read and write to data read and write to status
+- write the 8(4 functions for each a and b, can have a flag for a and b) then write the 2(call those previous 4 functions)
+- 0 channel a data, 1 channel b data, 2 channel a control, 3 channel b control
+- read comes from receive buffer
+- write goes to transmit buffer
+
+4 (transmit, receive, status, control, each with read write) go into -> 2 functions (1 read, 1 write) -> will be called by sid's framework
+update read write functions so that they can update the bits
+
+
+*/
+
+
 // serial test code
 
 // THINGS TO TEST
