@@ -7,6 +7,7 @@ struct circular_buffer{
     // read and write pointers point to the index of the buffer
     int readPointer;
     int writePointer;
+    int full;
 };
 
 // struct definition: represents each of the 4 registers that are used for serial communication
