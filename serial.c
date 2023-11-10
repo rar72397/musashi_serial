@@ -863,3 +863,37 @@ void TxRx_print(char channel, char type){
         printf("Invalid channel name. Use either A or B");
     }
 }
+
+// Jacob
+void write_control(char channel, int register, int bit){
+
+}
+
+// Amy
+unsigned char read_status(char channel, int register, int bit){
+    return
+}
+
+// channel: 'A' or 'B'
+// location: 'control' or 'buffer' 
+// val: 0 or 1
+void write(char channel, char location, int reg, int bit){
+    if(location == 'status'){
+        
+    }
+    else if(location == 'buffer'){
+        write_control(channel, reg, bit);
+    }
+}
+
+// channel: 'A' or 'B'
+// location: 'status' or 'buffer'
+// bit: 0-7
+unsigned char read(char channel, char location, int reg, int bit){
+    if(location == 'buffer'){
+        return ;
+    }
+    else if(location == 'status'){
+        return read_status(channel, reg, bit);
+    }
+}
