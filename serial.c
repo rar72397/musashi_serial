@@ -14,7 +14,8 @@
 #include <stdio.h>
 #include "serial.h"
 
-void buffer_init(struct circular_buffer* buffer){
+void buffer_init(struct circular_buffer *buffer)
+{
     buffer->full = 0;
     // initialize read and write pointers point to the index of the buffer
     buffer->readPointer = 0;
@@ -29,32 +30,35 @@ void buffer_init(struct circular_buffer* buffer){
 // circular buffer functions
 
 // read from buffer at read pointer
-unsigned char buffer_read(struct circular_buffer* buffer) {
-    if(buffer->readPointer == buffer->writePointer && buffer->buffer[buffer->readPointer-1] == 0)
+unsigned char buffer_read(struct circular_buffer *buffer)
+{
+    if (buffer->readPointer == buffer->writePointer && buffer->buffer[buffer->readPointer - 1] == 0)
     {
         printf("Buffer is empty\n");
         return -1;
-    } 
+    }
     // read everything in the buffer already so return the last read value
-    else if (buffer->readPointer == buffer->writePointer && buffer->buffer[buffer->readPointer-1] != 0)
+    else if (buffer->readPointer == buffer->writePointer && buffer->buffer[buffer->readPointer - 1] != 0)
     {
-        return buffer->buffer[buffer->readPointer-1];
+        return buffer->buffer[buffer->readPointer - 1];
     }
     // Read value from the current read pointer position
     unsigned char val = buffer->buffer[buffer->readPointer];
     // make sure to not read values that has not been written yet
-    if(buffer->readPointer != buffer->writePointer){
+    if (buffer->readPointer != buffer->writePointer)
+    {
         // Move the read pointer to the next position and handle wrapping
         buffer->readPointer = (buffer->readPointer + 1) % 16;
     }
     return val;
 }
 
-
 // write to buffer
-void buffer_write(struct circular_buffer* buffer, unsigned char val) {
+void buffer_write(struct circular_buffer *buffer, unsigned char val)
+{
     // if buffer was full and spaces opened up
-    if(buffer->full && buffer->readPointer != ((buffer->writePointer + 1) % 16)){
+    if (buffer->full && buffer->readPointer != ((buffer->writePointer + 1) % 16))
+    {
         buffer->full = 0;
         // Move the write pointer to the next position first since current position is occupied
         buffer->writePointer = (buffer->writePointer + 1) % 16;
@@ -62,18 +66,21 @@ void buffer_write(struct circular_buffer* buffer, unsigned char val) {
         buffer->buffer[buffer->writePointer] = val;
         // update position again so write pointer is at an empty space
         buffer->writePointer = (buffer->writePointer + 1) % 16;
-    } else if(buffer->readPointer != ((buffer->writePointer + 1) % 16)){ 
+    }
+    else if (buffer->readPointer != ((buffer->writePointer + 1) % 16))
+    {
         // Write value to the current write pointer position
         buffer->buffer[buffer->writePointer] = val;
         // Move the write pointer to the next position and handle wrapping
         buffer->writePointer = (buffer->writePointer + 1) % 16;
-    } else if (buffer->readPointer == ((buffer->writePointer + 1) % 16) && !buffer->full){
+    }
+    else if (buffer->readPointer == ((buffer->writePointer + 1) % 16) && !buffer->full)
+    {
         // fill in the last position in the buffer
         buffer->buffer[buffer->writePointer] = val;
         buffer->full = 1;
     }
 }
-
 
 // print existing items in buffer, empty spaces are represented by 0 so don't print those
 void buffer_print(struct circular_buffer *buffer)
@@ -965,6 +972,54 @@ unsigned char receive_read(char channel)
 }
 
 // -------------------------------------------------------------------------------------------------------------------------------------
+
+// ------------------------- Write to Control Register ------------------------------
+
+// Parameters:
+// @channel: 'A' or 'B'
+// @action: 's' or 'c' for set and clear respectively
+// @registerNumber: 0 through 7 (Representing CR_0 through CR_7)
+// @digit: 0 through 7 (Representing D_0 through D_7)
+
+void Write_Control(char channel, char action, unsigned char registerNumber, unsigned char digit)
+{
+    if (toupper(channel) == 'A')
+    {
+        if (action == 's')
+        {
+            chip.controlRegisterA[registerNumber] |= (1 << digit);
+        }
+        else if (action == 'c')
+        {
+            chip.controlRegisterA[registerNumber] &= ~(1 << digit);
+        }
+        else
+        {
+            printf("Invalid action. Use either 's' or 'c'");
+        }
+    }
+    else if (toupper(channel) == 'B')
+    {
+        if (action == 's')
+        {
+            chip.controlRegisterB[registerNumber] |= (1 << digit);
+        }
+        else if (action == 'c')
+        {
+            chip.controlRegisterB[registerNumber] &= ~(1 << digit);
+        }
+        else
+        {
+            printf("Invalid action. Use either 's' or 'c'");
+        }
+    }
+    else
+    {
+        printf("Invalid channel name. Use either 'A' or 'B'");
+    }
+}
+
+// ----------------------------------------------------------------------------------
 
 // for output purposes
 void TxRx_print(char channel, char type)
