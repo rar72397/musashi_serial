@@ -26,7 +26,6 @@ update read write functions so that they can update the bits
 
 */
 
-
 // serial test code
 
 // THINGS TO TEST
@@ -45,7 +44,8 @@ void test_writes()
     printf("Testing write functions...\n");
 
     // writing until the buffer is full, want to see if wrap around works
-    for(char c='a'; c<='z'; ++c){
+    for (char c = 'a'; c <= 'z'; ++c)
+    {
         transmit_write('A', c);
         transmit_write('B', c);
         receive_write('A', c);
@@ -83,7 +83,8 @@ void test_reads()
 void test_wrap()
 {
     printf("Testing buffer's ability to wrap around when full and everything in the beginning of the buffer has been read...\n");
-    for(char c='a'; c<='z'; ++c){
+    for (char c = 'a'; c <= 'z'; ++c)
+    {
         transmit_write('A', c);
         transmit_write('B', c);
         receive_write('A', c);
@@ -188,6 +189,30 @@ int main()
     test_read2();
     chip_init(); // reset chip
     test_wrap();
+
+    // Test for writing to the control registers
+    printf("Testing writing to control registers...\n");
+    // Call Write Control function
+    Write_Control('A', 's', 0, 0);
+    Write_Control('A', 's', 1, 0);
+    // Print out the bits of the control registers
+    printf("----- CONTROL REGISTERS -----\n");
+    for (int j = 0; j < 8; ++j)
+    {
+        printf("Register A%d: ", j);
+        for (int i = 7; i >= 0; i--)
+        {
+            printf("%d", (chip.controlRegisterA[j] >> i) & 1);
+        }
+        printf("\n");
+
+        printf("Register B%d: ", j);
+        for (int i = 7; i >= 0; i--)
+        {
+            printf("%d", (chip.controlRegisterB[j] >> i) & 1);
+        }
+        printf("\n");
+    }
 
     return 0;
 }
