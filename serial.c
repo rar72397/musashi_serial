@@ -821,8 +821,8 @@ void chip_init()
     chip.controlRegisterB[2] = 0;
 
     // CR3
-    RECEIVE_ENABLE('A', 'c');
-    RECEIVE_ENABLE('B', 'c');
+    RECEIVE_ENABLE('A', 's');
+    RECEIVE_ENABLE('B', 's');
 
     for (int i = 1; i <= 4; ++i)
     {
@@ -835,8 +835,8 @@ void chip_init()
     R_BITS_PER_CHAR('B', 0);
 
     // CR5
-    TRANSMITTER_ENABLE('A', 'c');
-    TRANSMITTER_ENABLE('B', 'c');
+    TRANSMITTER_ENABLE('A', 's');
+    TRANSMITTER_ENABLE('B', 's');
 
     // CR6
 
@@ -896,10 +896,12 @@ void transmit_write(char channel, char val)
     if (toupper(channel) == 'A')
     {
         buffer_write(&chip.aTransmit, val);
+        TRANSMITTER_BUFFER_EMPTY('A', 'c');
     }
     else if (toupper(channel) == 'B')
     {
         buffer_write(&chip.bTransmit, val);
+        TRANSMITTER_BUFFER_EMPTY('B', 'c');
     }
     else
     { // Only allowed to look at A and B channels
@@ -912,12 +914,20 @@ unsigned char transmit_read(char channel)
     if (toupper(channel) == 'A')
     {
         chip.TxA_byte_count++;
-        return buffer_read(&chip.aTransmit);
+        unsigned char val = buffer_read(&chip.aTransmit);
+        if(chip.aTransmit.full == 0){
+            TRANSMITTER_BUFFER_EMPTY('A', 's');
+        }
+        return val;
     }
     else if (toupper(channel) == 'B')
     {
         chip.TxB_byte_count++;
-        return buffer_read(&chip.bTransmit);
+        unsigned char val = buffer_read(&chip.bTransmit);
+        if(chip.bTransmit.full == 0){
+            TRANSMITTER_BUFFER_EMPTY('B', 's');
+        }
+        return val;
     }
     else
     { // Only allowed to look at A and B channels
@@ -1006,35 +1016,44 @@ void TxRx_print(char channel, char type)
 }
 
 // Jacob
-void write_control(char channel, int register, int bit){
+void write_control(char channel, int register, char val){
 
 }
 
 // Amy
-unsigned char read_status(char channel, int register, int bit){
+unsigned char read_status(char channel, int register, char val){
     return
 }
 
+// TWO FUNCTIONS BELOW ARE TO BE USED FROM "OUTSIDE" DEVICES TO INTERACT WITH THE SERIAL CHIP
+// 
+// important distinction: both the receive and transmit buffers will both have read and writes functions
+// however, outside devices can only write to the read buffer, and then they can only read from the transmit
+// (receive_write), (transmit_read),
+// 
+// We will use receive_read, and transmit_write for internal usages. (I.e. serial chip looking at its own data)
+// Also possible to replace this with a different approach
+
 // channel: 'A' or 'B'
-// location: 'control' or 'buffer' 
+// location: 'control', 'receive' 
 // val: 0 or 1
-void write(char channel, char location, int reg, int bit){
-    if(location == 'status'){
-        
+void write(char channel, char location, int reg, char val){
+    if(location == 'receive'){
+        receive_write(channel, val);
     }
-    else if(location == 'buffer'){
-        write_control(channel, reg, bit);
+    else if(location == 'control'){
+        write_control(channel, reg, val);
     }
 }
 
 // channel: 'A' or 'B'
-// location: 'status' or 'buffer'
+// location: 'status' or 'transmit'
 // bit: 0-7
-unsigned char read(char channel, char location, int reg, int bit){
-    if(location == 'buffer'){
-        return ;
+unsigned char read(char channel, char location, int reg, char val){
+    if(location == 'transmit'){
+        return transmit_read(channel);
     }
     else if(location == 'status'){
-        return read_status(channel, reg, bit);
+        return read_status(channel, reg, val);
     }
 }

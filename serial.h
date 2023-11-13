@@ -62,11 +62,14 @@ unsigned char receive_read(char channel);
 void TxRx_print(char channel, char type);
 
 // TO BE CALLED BY OTHER PROGRAMS
-void write(char channel, char location, int register, int bit);
-unsigned char read(char channel, char location, int register, int bit);
+void write(char channel, char location, int reg, char val);
+unsigned char read(char channel, char location, int reg, char val);
 
 // FOLLOWING 4 FUNCTIONS WILL BE PLACED CALLED WITHIN TOP 2
-void write_control(char channel, int register, int bit);
-unsigned char read_status(char channel, int register, int bit);
+void write_control(char channel, int reg, char val);
+unsigned char read_status(char channel, int reg, char val);
+
+//void receive_bit_write(char channel, int register, int bit);
+//unsigned char transmit_read_bit(char channel, int register, int bit);
 
 #endif
