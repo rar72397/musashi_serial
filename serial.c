@@ -869,9 +869,26 @@ void write_control(char channel, int register, int bit){
 
 }
 
-// Amy
-unsigned char read_status(char channel, int register, int bit){
-    return
+/*
+inputs:
+    a flag for which channel we're looking at
+    which register we want to read
+    which bit in that register we want to read
+    those three variables can help us can solve this expression for the output
+outputs:
+    the bit value we want from the specific status register
+*/
+unsigned char read_status(char channel, int reg, int bit){
+    // changed register variable name to reg since register is a reserved kayword in C
+    if(channel == 'A'){
+        return chip.statusRegisterA[reg] & (1 << bit);
+    }
+    else if(channel == 'B'){
+        return chip.statusRegisterB[reg] & (1 << bit);
+    }
+    else{
+        printf("Invalid channel name. Use either A or B");
+    } 
 }
 
 // channel: 'A' or 'B'
